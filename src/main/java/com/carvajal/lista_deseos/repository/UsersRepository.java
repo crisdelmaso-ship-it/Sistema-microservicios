@@ -8,8 +8,8 @@ import com.carvajal.lista_deseos.entity.Users;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
 
-    Optional<Users> findByUsername(String username);
-    Optional<Users> findByEmail(String email);
+    Optional<Users> findFirstByUsername(String username);
+    Optional<Users> findFirstByEmail(String email);
     
     
 }

@@ -1,22 +1,24 @@
-# Configuración de la aplicación
 spring:
-  # Configuración de la base de datos MySQL
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:mysql://localhost:3306/db_auth
     driverClassName: com.mysql.cj.jdbc.Driver
     username: root
     password:
+
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: none 
-    show-sql: true 
+      ddl-auto: none
+    show-sql: true
+
 server:
-  port: 8080 # Puerto del servidor
+  port: 8080
   servlet:
     context-path: /api/v1/
 
-security:
-  jwt:
-    secret-key: ${JWT_SECRET}
-    token-expiration: ${JWT_EXPIRATION}
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
