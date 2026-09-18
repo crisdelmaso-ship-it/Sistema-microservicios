@@ -2,24 +2,21 @@
 spring:
   # Configuración de la base de datos MySQL
   datasource:
-    url: jdbc:mysql://localhost:3306/bananas
+    url: jdbc:mysql://localhost:3306/db_auth
     driverClassName: com.mysql.cj.jdbc.Driver
     username: root
     password:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: none # Crea/actualiza las tablas automáticamente (usa 'none' en producción)
-    show-sql: true # Muestra las consultas SQL en la consola (opcional, desactiva en producción)
-
+      ddl-auto: none 
+    show-sql: true 
 server:
   port: 8080 # Puerto del servidor
   servlet:
     context-path: /api/v1/
 
-# Configuración de JWT
-# Configuración de JWT
 security:
   jwt:
-    secret-key: X7mQ9vL2kR8pT4zN6wY3aF5sH1dC9eB7uJ4xG8qW2nM6rK
-    token-expiration: 600000
+    secret-key: ${JWT_SECRET}
+    token-expiration: ${JWT_EXPIRATION}
