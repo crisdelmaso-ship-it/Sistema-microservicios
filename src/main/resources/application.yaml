@@ -3,10 +3,10 @@ spring:
     import: optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:mysql://localhost:3306/db_auth
+    url: jdbc:mysql://100.92.51.27:3306/db_auth
     driverClassName: com.mysql.cj.jdbc.Driver
-    username: root
-    password:
+    username: equipo
+    password: ${DB_PASSWORD}
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
