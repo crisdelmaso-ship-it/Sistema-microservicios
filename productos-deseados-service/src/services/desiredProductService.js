@@ -3,7 +3,7 @@ const axios = require('axios');
 const desiredProductRepository = require('../repositories/desiredProductRepository');
 const DesiredProductHistory = require('../models/DesiredProductHistory');
 
-const PRODUCTS_SERVICE_URL = process.env.PRODUCTS_SERVICE_URL;
+const PRODUCTS_SERVICE_URL = process.env.PRODUCTS_SERVICE_URL || 'http://localhost:3001';
 
 const getProduct = async (productoId) => {
   try {
