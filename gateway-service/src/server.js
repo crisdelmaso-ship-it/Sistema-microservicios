@@ -5,6 +5,7 @@ const PORT = Number(process.env.PORT || 3000);
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8080';
 const PRODUCTOS_SERVICE_URL = process.env.PRODUCTOS_SERVICE_URL || 'http://localhost:3001';
 const PURCHASES_SERVICE_URL = process.env.PURCHASES_SERVICE_URL || 'http://localhost:8082';
+const PRODUCTOS_DESEADOS_SERVICE_URL = process.env.PRODUCTOS_DESEADOS_SERVICE_URL || 'http://localhost:3003';
 
 const proxy = httpProxy.createProxyServer({
   changeOrigin: true
@@ -49,6 +50,11 @@ const server = http.createServer(function (request, response) {
     proxy.web(request, response, { target: PURCHASES_SERVICE_URL });
     return;
   }
+
+  if (request.url.indexOf('/api/products-wanted') === 0) {
+  proxy.web(request, response, { target: PRODUCTOS_DESEADOS_SERVICE_URL });
+  return;
+}
 
   if (request.url.indexOf('/api/products') === 0) {
     proxy.web(request, response, { target: PRODUCTOS_SERVICE_URL });
