@@ -29,10 +29,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, Long userId) {
+    public String generateToken(String email, Long userId, String username) {
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
+                .claim("username", username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey())
@@ -70,6 +71,10 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("userId", Long.class));
     }
 
+    public String extractUsername(String token) {
+        return extractClaim(token, claims -> claims.get("username", String.class));
+    }
+
     public String refreshToken(String token) throws Exception {
         Claims claims;
 
@@ -91,6 +96,9 @@ public class JwtService {
             throw new Exception("Error parsing token");
         }
 
-        return generateToken(claims.getSubject(), claims.get("userId", Long.class));
+        return generateToken(
+            claims.getSubject(),
+            claims.get("userId", Long.class),
+            claims.get("username", String.class));
     }
 }

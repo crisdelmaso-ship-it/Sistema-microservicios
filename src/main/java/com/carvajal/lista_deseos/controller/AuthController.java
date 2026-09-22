@@ -33,7 +33,9 @@ public class AuthController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            GlobalMessageResponseDTO<UserDTO> error = new GlobalMessageResponseDTO<>();
+            error.setMessage("No se pudo registrar el usuario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 

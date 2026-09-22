@@ -1,0 +1,180 @@
+{
+  "info": {
+    "name": "Sistema Microservicios",
+    "description": "Prueba completa del login, catalogo, gateway y compras.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "username",
+      "value": "usuario_prueba"
+    },
+    {
+      "key": "email",
+      "value": "usuario.prueba@example.com"
+    },
+    {
+      "key": "password",
+      "value": "Password123"
+    },
+    {
+      "key": "productId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticacion",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "Iniciar sesion y guardar token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.jwt) {",
+                  "    pm.collectionVariables.set('token', body.data.jwt);",
+                  "    console.log('Token guardado correctamente');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Catalogo",
+      "item": [
+        {
+          "name": "Crear producto con stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const productId = body.id || body.identificador;",
+                  "if (productId) {",
+                  "    pm.collectionVariables.set('productId', productId);",
+                  "    console.log('Producto guardado: ' + productId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto de prueba\",\n  \"descripcion\": \"Producto creado para probar compras\",\n  \"precio\": 25000,\n  \"stock\": 10,\n  \"categoria\": \"Pruebas\",\n  \"activo\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Consultar producto",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/products"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Compras",
+      "item": [
+        {
+          "name": "Crear compra con JWT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": {{productId}},\n  \"cantidad\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/purchases"
+          }
+        },
+        {
+          "name": "Consultar mis compras",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/purchases"
+          }
+        }
+      ]
+    }
+  ]
+}

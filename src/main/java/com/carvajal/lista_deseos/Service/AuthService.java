@@ -27,6 +27,14 @@ public class AuthService {
 
         GlobalMessageResponseDTO<UserDTO> response = new GlobalMessageResponseDTO<>();
 
+        if (request == null
+                || isBlank(request.getUsername())
+                || isBlank(request.getEmail())
+                || isBlank(request.getPassword())) {
+            response.setMessage("Usuario, correo y contraseña son obligatorios");
+            return response;
+        }
+
       
         if (usersRepository.findFirstByEmail(request.getEmail()).isPresent()) {
             response.setMessage("El correo ya se encuentra en uso");
@@ -59,6 +67,10 @@ public class AuthService {
         response.setMessage("Usuario registrado correctamente");
 
         return response;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     public GlobalMessageResponseDTO<LoginResponseDTO> login(LoginRequestDto request) {
@@ -95,7 +107,8 @@ public class AuthService {
 
     String jwt = jwtService.generateToken(
             userFound.getEmail(),
-            userFound.getId()
+            userFound.getId(),
+            userFound.getUsername()
     );
 
     LoginResponseDTO loginResponse = new LoginResponseDTO();
