@@ -2,6 +2,7 @@ const http = require('http');
 const httpProxy = require('http-proxy');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const PORT = Number(process.env.PORT || 3000);
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8080';
@@ -91,9 +92,9 @@ const server = http.createServer(function (request, response) {
   }
 
   if (request.url.indexOf('/api/products-wanted') === 0) {
-  proxy.web(request, response, { target: PRODUCTOS_DESEADOS_SERVICE_URL });
-  return;
-}
+    proxy.web(request, response, { target: PRODUCTOS_DESEADOS_SERVICE_URL });
+    return;
+  }
 
   if (request.url.indexOf('/api/products') === 0) {
     proxy.web(request, response, { target: PRODUCTOS_SERVICE_URL });
@@ -108,4 +109,5 @@ server.listen(PORT, function () {
   console.log('Auth service: ' + AUTH_SERVICE_URL);
   console.log('Products service: ' + PRODUCTOS_SERVICE_URL);
   console.log('Purchases service: ' + PURCHASES_SERVICE_URL);
+  console.log('Desired products service: ' + PRODUCTOS_DESEADOS_SERVICE_URL);
 });

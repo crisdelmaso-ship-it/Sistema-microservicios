@@ -15,5 +15,9 @@ export class AuthService {
   token(): string | null { return sessionStorage.getItem(this.key); }
   isAuthenticated(): boolean { return !!this.token(); }
   logout(): void { sessionStorage.removeItem(this.key); }
-  errorMessage(error: HttpErrorResponse): string { return error.error?.message || error.error?.mensaje || 'No fue posible completar la operación.'; }
+  errorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) return 'No se pudo conectar con el gateway. Verifica que esté iniciado y que la dirección sea accesible desde este equipo.';
+    if (error.status === 502 || error.status === 504) return error.error?.message || 'El gateway no puede comunicarse con uno de los servicios.';
+    return error.error?.message || error.error?.mensaje || 'No fue posible completar la operación.';
+  }
 }
