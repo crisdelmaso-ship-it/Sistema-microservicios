@@ -1,15 +1,54 @@
 const http = require('http');
 const httpProxy = require('http-proxy');
+const fs = require('fs');
+const path = require('path');
 
 const PORT = Number(process.env.PORT || 3000);
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8080';
 const PRODUCTOS_SERVICE_URL = process.env.PRODUCTOS_SERVICE_URL || 'http://localhost:3001';
 const PURCHASES_SERVICE_URL = process.env.PURCHASES_SERVICE_URL || 'http://localhost:8082';
 const PRODUCTOS_DESEADOS_SERVICE_URL = process.env.PRODUCTOS_DESEADOS_SERVICE_URL || 'http://localhost:3003';
+const FRONTEND_ROOT = path.resolve(__dirname, '../../frontend/dist/frontend/browser');
 
 const proxy = httpProxy.createProxyServer({
-  changeOrigin: true
+  changeOrigin: true,
+  proxyTimeout: 15000,
+  timeout: 15000
 });
+
+const contentTypes = {
+  '.css': 'text/css',
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2'
+};
+
+function serveFrontend(request, response) {
+  const requestedPath = decodeURIComponent(request.url.split('?')[0]);
+  const relativePath = requestedPath === '/' ? 'index.html' : requestedPath.slice(1);
+  const candidate = path.resolve(FRONTEND_ROOT, relativePath);
+  const isInsideFrontend = candidate === FRONTEND_ROOT || candidate.startsWith(FRONTEND_ROOT + path.sep);
+  const filePath = isInsideFrontend && fs.existsSync(candidate) && fs.statSync(candidate).isFile()
+    ? candidate
+    : path.join(FRONTEND_ROOT, 'index.html');
+
+  if (!fs.existsSync(filePath)) {
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: 'Frontend no compilado. Ejecuta npm --prefix frontend run build.' }));
+    return;
+  }
+
+  response.writeHead(200, {
+    'Content-Type': contentTypes[path.extname(filePath)] || 'application/octet-stream'
+  });
+  fs.createReadStream(filePath).pipe(response);
+}
 
 proxy.on('error', function (error, request, response) {
   if (response.headersSent) {
@@ -19,7 +58,7 @@ proxy.on('error', function (error, request, response) {
 
   response.writeHead(502, { 'Content-Type': 'application/json' });
   response.end(JSON.stringify({
-    message: 'Servicio no disponible',
+    message: 'Servicio no disponible o agotó el tiempo de espera',
     detail: error.message
   }));
 });
@@ -61,8 +100,7 @@ const server = http.createServer(function (request, response) {
     return;
   }
 
-  response.writeHead(404, { 'Content-Type': 'application/json' });
-  response.end(JSON.stringify({ message: 'Ruta no encontrada' }));
+  serveFrontend(request, response);
 });
 
 server.listen(PORT, function () {
