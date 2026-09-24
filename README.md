@@ -100,8 +100,8 @@ El frontend usa el gateway para las llamadas API. Los `.env` reales permanecen i
 
 ## Error conocido al iniciar compras
 
-El servicio de compras necesita `JWT_SECRET` para validar los mismos tokens que genera autenticacion. Su `application.yaml` carga opcionalmente el `.env` de la raiz. Si el archivo no existe o no contiene esa variable, Spring falla con `Could not resolve placeholder 'JWT_SECRET'` y no abre el puerto `8082`.
+El servicio de compras necesita `JWT_SECRET` para validar los mismos tokens que genera autenticacion. Su `application.yaml` busca el `.env` en el directorio actual y también en el directorio padre. Así funciona tanto si se ejecuta el comando desde la raiz como desde `compras-service`. Cada integrante puede usar sus propios valores de `PURCHASES_PORT`, `PURCHASES_DB_URL`, `PURCHASES_DB_USERNAME`, `PURCHASES_DB_PASSWORD` y `PRODUCTOS_SERVICE_URL` en su `.env` local. Si el archivo no contiene `JWT_SECRET`, Spring falla con `Could not resolve placeholder 'JWT_SECRET'` y no abre el puerto configurado.
 
 Si `JWT_SECRET` ya esta configurado y el arranque aun falla con `Access denied for user 'equipo'`, la comunicacion con la base `db_purchases` esta rechazando la credencial. En ese caso se debe corregir `DB_PASSWORD` o los permisos del usuario en MySQL; no es un problema del frontend ni del gateway.
 
-Cuando un servicio no esta disponible, el frontend ya no queda esperando indefinidamente: muestra si no pudo conectarse al gateway o si el gateway devolvio un error `502/504`. Comprueba primero `http://localhost:3000/health` y que todos los servicios esten escuchando en sus puertos.
+Cuando un servicio no esta disponible, el frontend ya no queda esperando indefinidamente: muestra si no pudo conectarse al gateway o si el gateway devolvio un error `502/504`. Comprueba primero `http://localhost:3000/health` y que todos los servicios esten escuchando en sus puertos. Si el frontend se abre desde otro equipo, usa la IP del equipo donde corre Angular; `localhost` siempre significa el equipo del navegador.

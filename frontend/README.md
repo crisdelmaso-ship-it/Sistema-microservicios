@@ -11,8 +11,24 @@ cd gateway-service && npm start
 cd frontend && npm start
 ```
 
-Abre `http://localhost:4200/`. El frontend consume exclusivamente el gateway en
-`http://localhost:3000`.
+En el mismo equipo abre `http://localhost:4200/`. Para acceder desde otro
+computador, abre la IP del equipo que ejecuta Angular, por ejemplo
+`http://100.97.185.75:4200/`; no uses `localhost`, porque apunta al computador
+desde el que se abre el navegador. El proxy de desarrollo redirige las rutas
+`/api` al gateway en el equipo servidor.
+
+El gateway y los microservicios deben ejecutarse en el mismo equipo cuando sus
+URLs usan `localhost`. Si se distribuyen entre varios equipos, configura en
+`gateway-service/.env` la IP o el nombre de cada servicio.
+
+Antes de probar desde otro computador, valida desde ese equipo:
+
+```powershell
+Test-NetConnection 100.97.185.75 -Port 4200
+Test-NetConnection 100.97.185.75 -Port 3000
+```
+
+Ambos puertos deben devolver `TcpTestSucceeded : True`.
 
 ## JWT
 

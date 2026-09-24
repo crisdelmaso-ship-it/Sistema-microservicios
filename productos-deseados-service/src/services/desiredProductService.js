@@ -8,7 +8,8 @@ const PRODUCTS_SERVICE_URL = process.env.PRODUCTS_SERVICE_URL || 'http://localho
 const getProduct = async (productoId) => {
   try {
     const response = await axios.get(
-      `${PRODUCTS_SERVICE_URL}/api/products/${productoId}`
+      `${PRODUCTS_SERVICE_URL}/api/products/${productoId}`,
+      { timeout: 5000 }
     );
 
     return response.data;

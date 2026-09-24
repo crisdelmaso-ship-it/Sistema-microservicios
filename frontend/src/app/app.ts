@@ -108,6 +108,61 @@ export class App implements OnInit {
     });
   }
 
+  productImage(product: Product): string {
+    return this.isUsableImageUrl(product.imagenUrl)
+      ? product.imagenUrl as string
+      : `/images/products/product-${product.id}.webp`;
+  }
+
+  wishlistProduct(item: DesiredProduct): Product | undefined {
+    return item.producto || this.products.find(product => product.id === item.productoId);
+  }
+
+  wishlistImage(item: DesiredProduct): string {
+    const product = this.wishlistProduct(item);
+    return product ? this.productImage(product) : `/images/products/product-${item.productoId}.webp`;
+  }
+
+  wishlistName(item: DesiredProduct): string {
+    return this.wishlistProduct(item)?.nombre || `Producto #${item.productoId}`;
+  }
+
+  private isUsableImageUrl(url?: string): boolean {
+    return !!url && !url.includes('ejemplo.com');
+  }
+
+  purchaseProduct(purchase: Purchase): Product | undefined {
+    return this.products.find(product => product.id === purchase.productoId);
+  }
+
+  purchaseImage(purchase: Purchase): string {
+    const product = this.purchaseProduct(purchase);
+    return product ? this.productImage(product) : `/images/products/product-${purchase.productoId}.webp`;
+  }
+
+  purchaseName(purchase: Purchase): string {
+    return this.purchaseProduct(purchase)?.nombre || `Producto #${purchase.productoId}`;
+  }
+
+  handleImageError(event: Event): void {
+    const image = event.target as HTMLImageElement;
+    const productId = image.dataset['productId'];
+    const localImage = productId ? `/images/products/product-${productId}.webp` : '';
+
+    if (localImage && !image.src.endsWith(localImage)) {
+      image.onerror = null;
+      image.src = localImage;
+      image.onerror = () => {
+        image.hidden = true;
+        image.nextElementSibling?.removeAttribute('hidden');
+      };
+      return;
+    }
+
+    image.hidden = true;
+    image.nextElementSibling?.removeAttribute('hidden');
+  }
+
   buyDesired(item: DesiredProduct): void {
     if (item.producto) this.buy(item.producto, item.cantidad);
   }
