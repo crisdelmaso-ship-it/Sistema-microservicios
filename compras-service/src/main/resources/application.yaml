@@ -15,7 +15,7 @@ spring:
     show-sql: true
 
 server:
-  port: ${PURCHASES_PORT:8082}
+  port: ${PURCHASES_PORT:9091}
   servlet:
     context-path: /api/v1
 
@@ -24,3 +24,4 @@ jwt:
 
 catalog:
   base-url: ${PRODUCTOS_SERVICE_URL:http://localhost:3001}
+  service-token: ${INTERNAL_SERVICE_TOKEN}

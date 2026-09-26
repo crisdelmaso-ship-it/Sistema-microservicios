@@ -5,9 +5,9 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const PORT = Number(process.env.PORT || 3000);
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8080';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:9090';
 const PRODUCTOS_SERVICE_URL = process.env.PRODUCTOS_SERVICE_URL || 'http://localhost:3001';
-const PURCHASES_SERVICE_URL = process.env.PURCHASES_SERVICE_URL || 'http://localhost:8082';
+const PURCHASES_SERVICE_URL = process.env.PURCHASES_SERVICE_URL || 'http://localhost:9091';
 const PRODUCTOS_DESEADOS_SERVICE_URL = process.env.PRODUCTOS_DESEADOS_SERVICE_URL || 'http://localhost:3003';
 const FRONTEND_ROOT = path.resolve(__dirname, '../../frontend/dist/frontend/browser');
 

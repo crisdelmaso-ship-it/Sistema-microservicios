@@ -13,20 +13,23 @@ import org.springframework.web.client.RestClientException;
 public class CatalogClient {
 
     private final RestClient restClient;
+    private final String serviceToken;
 
     public CatalogClient(@Value("${catalog.base-url}") String baseUrl,
+            @Value("${catalog.service-token}") String serviceToken,
             RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
+        this.serviceToken = serviceToken;
     }
 
     public ProductInfo getProduct(Long productId) {
         try {
-                Map<String, Object> product = restClient.get()
+            Map<String, Object> product = restClient.get()
                     .uri("/api/products/{id}", productId)
                     .retrieve()
                     .body(Map.class);
 
-                if (product == null || product.get("id") == null) {
+            if (product == null || product.get("id") == null) {
                 throw new CatalogException("El producto no fue encontrado");
             }
 
@@ -43,6 +46,7 @@ public class CatalogClient {
         try {
             restClient.patch()
                     .uri("/api/products/{id}/stock", productId)
+                    .header("X-Service-Token", serviceToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of("stock", stock))
                     .retrieve()

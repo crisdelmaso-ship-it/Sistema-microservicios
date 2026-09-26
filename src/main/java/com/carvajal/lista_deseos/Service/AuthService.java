@@ -54,6 +54,7 @@ public class AuthService {
         user.setPassword(
             passwordEncoder.encode(request.getPassword())
         );
+        user.setRole(com.carvajal.lista_deseos.entity.Emun.RoleEnum.USER);
 
         usersRepository.save(user);
 
@@ -62,6 +63,7 @@ public class AuthService {
         userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
+        userDTO.setRole(user.getRole().name());
 
         response.setData(userDTO);
         response.setMessage("Usuario registrado correctamente");
@@ -108,7 +110,8 @@ public class AuthService {
     String jwt = jwtService.generateToken(
             userFound.getEmail(),
             userFound.getId(),
-            userFound.getUsername()
+            userFound.getUsername(),
+            userFound.getRole().name()
     );
 
     LoginResponseDTO loginResponse = new LoginResponseDTO();

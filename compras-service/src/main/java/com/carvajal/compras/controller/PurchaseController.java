@@ -30,8 +30,8 @@ public class PurchaseController {
             @Valid @RequestBody CreatePurchaseRequest request,
             HttpServletRequest httpRequest) {
         Long userId = (Long) httpRequest.getAttribute("userId");
-            String username = (String) httpRequest.getAttribute("username");
-            PurchaseResponse response = PurchaseResponse.from(purchaseService.create(userId, username, request));
+        String username = (String) httpRequest.getAttribute("username");
+        PurchaseResponse response = PurchaseResponse.from(purchaseService.create(userId, username, request));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

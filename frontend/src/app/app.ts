@@ -20,6 +20,7 @@ export class App implements OnInit {
   mode: 'login' | 'register' = 'login';
   view: 'catalog' | 'wishlist' | 'purchases' = 'catalog';
   loggedIn = false;
+  isAdmin = false;
   loading = false;
   notice = '';
   error = '';
@@ -28,9 +29,21 @@ export class App implements OnInit {
   purchases: Purchase[] = [];
   credentials = { user: '', password: '' };
   registration = { username: '', email: '', password: '' };
+  showAdminForm = false;
+  editingProductId: number | null = null;
+  productForm = {
+    nombre: '',
+    descripcion: '',
+    precio: 0,
+    stock: 0,
+    categoria: '',
+    imagenUrl: '',
+    activo: true
+  };
 
   ngOnInit(): void {
     this.loggedIn = this.auth.isAuthenticated();
+    this.isAdmin = this.auth.isAdmin();
     if (this.loggedIn) this.loadProducts();
   }
 
@@ -55,6 +68,7 @@ export class App implements OnInit {
         }
 
         this.loggedIn = true;
+        this.isAdmin = this.auth.isAdmin();
         this.notice = 'Sesión iniciada correctamente.';
         this.loadProducts();
       },
@@ -99,11 +113,116 @@ export class App implements OnInit {
   }
 
   buy(product: Product, quantity = 1): void {
+    if (this.isAdmin && this.showAdminForm) {
+      this.notice = 'Cierra el formulario de edición antes de comprar.';
+      return;
+    }
     if (quantity > product.stock) { this.error = 'La cantidad supera el stock disponible.'; return; }
     this.clearMessages();
     this.loading = true;
     this.store.buy(product.id, quantity).pipe(finalize(() => this.finishRequest())).subscribe({
       next: () => { this.notice = 'Compra realizada correctamente.'; this.loadProducts(); },
+      error: (error) => this.error = this.auth.errorMessage(error)
+    });
+  }
+
+  openCreateProductForm(): void {
+    this.showAdminForm = true;
+    this.editingProductId = null;
+    this.productForm = {
+      nombre: '',
+      descripcion: '',
+      precio: 0,
+      stock: 0,
+      categoria: '',
+      imagenUrl: '',
+      activo: true
+    };
+  }
+
+  openEditProductForm(product: Product): void {
+    this.showAdminForm = true;
+    this.editingProductId = product.id;
+    this.productForm = {
+      nombre: product.nombre,
+      descripcion: product.descripcion ?? '',
+      precio: Number(product.precio),
+      stock: product.stock,
+      categoria: product.categoria ?? '',
+      imagenUrl: product.imagenUrl ?? '',
+      activo: product.activo
+    };
+  }
+
+  cancelProductForm(): void {
+    this.showAdminForm = false;
+    this.editingProductId = null;
+    this.productForm = {
+      nombre: '',
+      descripcion: '',
+      precio: 0,
+      stock: 0,
+      categoria: '',
+      imagenUrl: '',
+      activo: true
+    };
+  }
+
+  saveProduct(): void {
+    if (!this.productForm.nombre.trim()) {
+      this.error = 'El nombre del producto es obligatorio.';
+      return;
+    }
+
+    if (this.productForm.precio < 0) {
+      this.error = 'El precio no puede ser negativo.';
+      return;
+    }
+
+    if (this.productForm.stock < 0) {
+      this.error = 'El stock no puede ser negativo.';
+      return;
+    }
+
+    this.clearMessages();
+    this.loading = true;
+
+    const payload = {
+      nombre: this.productForm.nombre,
+      descripcion: this.productForm.descripcion,
+      precio: Number(this.productForm.precio),
+      stock: Number(this.productForm.stock),
+      categoria: this.productForm.categoria,
+      imagenUrl: this.productForm.imagenUrl,
+      activo: this.productForm.activo
+    };
+
+    const request$ = this.editingProductId !== null
+      ? this.store.updateProduct(this.editingProductId, payload)
+      : this.store.createProduct(payload);
+
+    request$.pipe(finalize(() => this.finishRequest())).subscribe({
+      next: () => {
+        this.notice = this.editingProductId !== null ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.';
+        this.cancelProductForm();
+        this.loadProducts();
+      },
+      error: (error) => this.error = this.auth.errorMessage(error)
+    });
+  }
+
+  deleteProduct(product: Product): void {
+    if (!confirm(`¿Deseas eliminar el producto "${product.nombre}"?`)) {
+      return;
+    }
+
+    this.clearMessages();
+    this.loading = true;
+    this.store.deleteProduct(product.id).pipe(finalize(() => this.finishRequest())).subscribe({
+      next: () => {
+        this.notice = 'Producto eliminado correctamente.';
+        this.loadProducts();
+      },
       error: (error) => this.error = this.auth.errorMessage(error)
     });
   }
@@ -179,6 +298,9 @@ export class App implements OnInit {
   logout(): void {
     this.auth.logout();
     this.loggedIn = false;
+    this.isAdmin = false;
+    this.showAdminForm = false;
+    this.editingProductId = null;
     this.view = 'catalog';
     this.notice = 'Sesión cerrada.';
   }

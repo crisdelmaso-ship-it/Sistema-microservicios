@@ -13,4 +13,7 @@ export class StoreService {
   removeFromWishlist(id: number) { return this.http.delete(`${API}/api/products-wanted/${id}`).pipe(timeout(12000)); }
   buy(productId: number, quantity: number) { return this.http.post<Purchase>(`${API}/api/v1/purchases`, { productoId: productId, cantidad: quantity }).pipe(timeout(12000)); }
   purchases() { return this.http.get<Purchase[]>(`${API}/api/v1/purchases`).pipe(timeout(12000)); }
+  createProduct(product: Partial<Product>) { return this.http.post<Product>(`${API}/api/products`, product).pipe(timeout(12000)); }
+  updateProduct(id: number, product: Partial<Product>) { return this.http.put<Product>(`${API}/api/products/${id}`, product).pipe(timeout(12000)); }
+  deleteProduct(id: number) { return this.http.delete(`${API}/api/products/${id}`).pipe(timeout(12000)); }
 }

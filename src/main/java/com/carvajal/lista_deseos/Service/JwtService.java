@@ -29,16 +29,20 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, Long userId, String username) {
+    public String generateToken(String email, Long userId, String username, String role) {
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
                 .claim("username", username)
+                .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey())
                 .compact();
+    }
 
+    public String generateToken(String email, Long userId, String username) {
+        return generateToken(email, userId, username, "USER");
     }
 
     public Boolean isTokenValid(String token) {
@@ -75,6 +79,10 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("username", String.class));
     }
 
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
     public String refreshToken(String token) throws Exception {
         Claims claims;
 
@@ -97,8 +105,9 @@ public class JwtService {
         }
 
         return generateToken(
-            claims.getSubject(),
-            claims.get("userId", Long.class),
-            claims.get("username", String.class));
+                claims.getSubject(),
+                claims.get("userId", Long.class),
+                claims.get("username", String.class),
+                claims.get("role", String.class));
     }
 }
